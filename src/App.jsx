@@ -16,7 +16,7 @@ function App() {
         {/* <Route path="/" exact element={<Home />} />
         <Route path="/about" exact element={<About />} />
         {/* <Route path="/profile" element={<UserProfile />} /> */}
-        <Route
+        {/* <Route
           path="/profile"
           element={<RequiredAuth component={UserProfile} />}
         />{" "}
