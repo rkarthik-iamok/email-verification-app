@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { jsontohtml } from "jsontohtml-render";
 import { json } from "react-router-dom";
 import config from "../../config";
+import axios from "axios";
 
 function Home() {
   const [verifyStatus, setVerifyStatus] = useState("VERIFY");
@@ -15,7 +16,7 @@ function Home() {
     const getToken = async () => {
       try {
         const token = await getAccessTokenSilently();
-        console.log(`${JSON.stringify(token, null, 4)}`);
+        setAccessToken(token);
       } catch (e) {
         console.log(`Unable to fetch token, ${JSON.stringify(e, null, 4)}`);
       }
@@ -23,6 +24,29 @@ function Home() {
 
     getToken();
   }, []);
+
+  const resend = async () => {
+    try {
+      const url =
+        "https://email-notification-backend.vercel.app/sendverificationemail";
+      console.log(`Trying to send verification email.`);
+
+      // Create the headers
+      let headers = {};
+      headers["Content-Type"] = "application/json";
+      headers["Authorization"] = `Bearer ${accessToken}`;
+
+      axios.post(
+        url,
+        {},
+        {
+          headers,
+        }
+      );
+    } catch (e) {
+      console.log(`Unable to send API call, ${JSON.stringify(e, null, 4)}`);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -46,7 +70,9 @@ function Home() {
           </p>
           <br />
 
-          <button className="btn btn-primary">Resend Email</button>
+          <button className="btn btn-primary" onClick={resend}>
+            Resend Verification Email
+          </button>
         </div>
 
         {/* <div className="text-center font-bold">User Profile</div>
