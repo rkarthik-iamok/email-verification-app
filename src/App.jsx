@@ -8,7 +8,8 @@ import RequiredAuth from "./components/RequiredAuth";
 
 function App() {
   return (
-    <div className="flex flex-col justify-between h-screen">
+    // <div className="flex flex-col justify-between h-screen">
+    <div className="flex items-center justify-center min-h-screen">
       {/* <Navbar /> */}
       <Routes>
         <Route path="/" exact element={<Home />} />

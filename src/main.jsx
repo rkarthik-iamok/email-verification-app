@@ -15,7 +15,9 @@ root.render(
     authorizationParams={{
       redirect_uri: window.location.origin,
       audience: config.oidc.audience,
+      scope: "openid email profile offline_access",
     }}
+    useRefreshTokens={true}
   >
     <Router>
       <App />
