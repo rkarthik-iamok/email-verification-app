@@ -8,6 +8,7 @@ import axios from "axios";
 function Home() {
   const [verifyStatus, setVerifyStatus] = useState("VERIFY");
   const [accessToken, setAccessToken] = useState("");
+  const [emailMessage, setEmailMessage] = useState("");
 
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } =
     useAuth0();
@@ -36,13 +37,14 @@ function Home() {
       headers["Content-Type"] = "application/json";
       headers["Authorization"] = `Bearer ${accessToken}`;
 
-      axios.post(
+      const response = axios.post(
         url,
         {},
         {
           headers,
         }
       );
+      setEmailMessage("Verification Email has been sent");
     } catch (e) {
       console.log(`Unable to send API call, ${JSON.stringify(e, null, 4)}`);
     }
@@ -73,6 +75,8 @@ function Home() {
           <button className="btn btn-primary" onClick={resend}>
             Resend Verification Email
           </button>
+
+          <p>{emailMessage && { emailMessage }}</p>
         </div>
 
         {/* <div className="text-center font-bold">User Profile</div>
