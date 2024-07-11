@@ -12,12 +12,13 @@ root.render(
   <Auth0Provider
     domain={config.oidc.domain}
     clientId={config.oidc.clientId}
+    useRefreshTokens={true}
+    useRefreshTokensFallback={true}
     authorizationParams={{
       redirect_uri: window.location.origin,
       audience: config.oidc.audience,
       scope: "openid email profile offline_access",
     }}
-    useRefreshTokens={true}
   >
     <Router>
       <App />

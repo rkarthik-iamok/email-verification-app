@@ -12,13 +12,15 @@ function App() {
     <div className="flex items-center justify-center min-h-screen">
       {/* <Navbar /> */}
       <Routes>
-        <Route path="/" exact element={<Home />} />
+        <Route path="/" element={<RequiredAuth component={Home} />} />
+        {/* <Route path="/" exact element={<Home />} />
         <Route path="/about" exact element={<About />} />
         {/* <Route path="/profile" element={<UserProfile />} /> */}
         <Route
           path="/profile"
           element={<RequiredAuth component={UserProfile} />}
-        />
+        />{" "}
+        */}
       </Routes>
       {/* <Footer /> */}
     </div>
