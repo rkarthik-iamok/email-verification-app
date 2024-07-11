@@ -75,6 +75,8 @@ function Home() {
           <button className="btn btn-primary" onClick={resend}>
             Resend Verification Email
           </button>
+          <br />
+          <br />
 
           <p>{emailMessage}</p>
         </div>
