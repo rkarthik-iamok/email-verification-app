@@ -76,9 +76,7 @@ function Home() {
             Resend Verification Email
           </button>
 
-          <p>
-            {emailMessage} && {emailMessage}
-          </p>
+          <p>{emailMessage}</p>
         </div>
 
         {/* <div className="text-center font-bold">User Profile</div>
