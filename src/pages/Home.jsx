@@ -5,11 +5,16 @@ import { json } from "react-router-dom";
 import config from "../../config";
 import axios from "axios";
 import VerifyWidget from "../components/VerifyWidget";
+import { resendEmail, isEmailVerified } from "../../services/apiService";
 
 function Home() {
   const [verifyStatus, setVerifyStatus] = useState("NOT VERIFIED");
   const [emailMessage, setEmailMessage] = useState("");
   const [accessToken, setAccessToken] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [intervalId, setIntervalId] = useState({});
+  const [continueUrl, setContinueUrl] = useState("");
+  const [continueState, setContinueState] = useState("");
 
   // Do not Run on First Load
   const isStatusFirstRender = useRef(true);
@@ -17,139 +22,96 @@ function Home() {
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } =
     useAuth0();
 
-  const resend = async () => {
-    console.log(`Resend action taken`);
-    // let accessToken = sessionStorage["accessToken"];
+  function clearFetchEmailStatus() {
+    clearInterval(intervalId.id);
+  }
+
+  const continueFunction = async () => {
+    const url = `${continueUrl}?state=${continueState}`;
+    console.log(`Continue Button has been Clicked. Redirecting to ${url}`);
+    window.location.href = url;
+  };
+
+  // Resend Email
+  const resendVerificationEmail = async () => {
     try {
-      const url =
-        "https://email-notification-backend.vercel.app/sendverificationemail";
-      console.log(`Trying to send verification email.`);
-
-      // Create the headers
-      let headers = {};
-      headers["Content-Type"] = "application/json";
-      headers["Authorization"] = `Bearer ${accessToken}`;
-
-      const response = axios.post(
-        url,
-        {},
-        {
-          headers,
-        }
-      );
-      setEmailMessage("Verification Email has been sent again.");
-      console.log(`Email Verification Response: ${response.data}`);
+      const response = await resendEmail(accessToken);
+      console.log(`Resend Email response: ${JSON.stringify(response.data.id)}`);
+      setEmailMessage("Email sent. Please check your mailbox");
     } catch (e) {
-      console.log(`Unable to send API call, ${JSON.stringify(e, null, 4)}`);
+      console.log(`Unable to Send Verification Email: ${e}`);
+      setErrorMessage(`Unable to send Verification Email`);
+      clearFetchEmailStatus();
+    }
+  };
+
+  // Email Verification Function
+  const getEmailVerificationStatus = async () => {
+    const response = await isEmailVerified(accessToken);
+    // console.log(
+    //   `Status Response in Main: ${JSON.stringify(response, null, 3)}`
+    // );
+    console.log(`Email Verification Response: ${response.status}`);
+    if (response.status) {
+      setVerifyStatus("VERIFIED");
+      clearInterval(intervalId.id);
     }
   };
 
   // Use Effect - Get Access Token
   useEffect(() => {
-    // Get Access Token
+    //Get Access Token
     const getAccessToken = async () => {
       try {
         const token = await getAccessTokenSilently();
-        console.log(`Obtained Access Token: ${token}`);
-        sessionStorage.setItem("accessToken", token);
-
+        // console.log(`Obtained Access Token: ${token}`);
+        // sessionStorage.setItem("accessToken", token);
         // Set it in the State
+        console.log(`Obtained Access Token`);
         setAccessToken(token);
       } catch (e) {
         console.log(`Unable to get Access Token: ${JSON.stringify(e)}`);
+        setErrorMessage(`Unable to initialize.`);
       }
     };
 
+    // Use Effect Main Thread
+    // Parse the Query Parameters
+    const queryString = window.location.search;
+    console.log(`Query String: ${queryString}`);
+    const urlParams = new URLSearchParams(queryString);
+    setContinueState(urlParams.get("state"));
+    // const sessionToken = urlParams.get("session_token");
+    setContinueUrl(urlParams.get("redirect_uri"));
+    // console.log(`State Object: ${state}`);
+    // console.log(`sessionToken: ${sessionToken}`);
+    // console.log(`continueUri: ${continueUri}`);
     // Fetch Access Token on initial Load
-    console.log(`Fetch Access Token on initial Load`);
+    // console.log(`Fetch Access Token on initial Load`);
+
+    // Get an Access Token everytime.
     getAccessToken();
   }, []);
 
   useEffect(() => {
-    // Parse the Query Parameters
-    const queryString = window.location.search;
-    console.log(`Query String: ${queryString}`);
-
-    const urlParams = new URLSearchParams(queryString);
-    const state = urlParams.get("state");
-
-    console.log(`State Object: ${state}`);
-
     // Suppress the Automatic Render during the Initial Load
     if (isStatusFirstRender.current) {
       isStatusFirstRender.current = false;
       return;
     }
-    // Email Verification Function
-    const getEmailVerificationStatus = async () => {
-      //Get Access Token from storage
-      // let accessToken = sessionStorage["accessToken"];
-      // console.log(`Token from Storage: ${accessToken}`);
-      // Get Email Verification Status
-      // console.log(accessToken);
-      let url =
-        "https://email-notification-backend.vercel.app/getemailverificationstatus";
 
-      try {
-        const response = await axios.get(url, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        console.log(`Email Verification Status: ${response.data.status}`);
-        if (response.data.status == "true") {
-          setVerifyStatus("VERIFIED");
-          clearInterval(intervalId.id);
-        }
-      } catch (e) {
-        console.log(
-          `Unable to get Email Verification Status: ${JSON.stringify(e)}`
-        );
-      }
-    };
-    // Get Application Login URI
-    const getAppLoginUri = async () => {
-      let url =
-        "https://email-notification-backend.vercel.app/applicationloginuri";
+    if (!errorMessage) {
+      // Use Effect Main Thread
+      console.log(`Fetching the Email Verification Status`);
 
-      try {
-        const response = await axios.get(url, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        console.log(`Response: ${JSON.stringify(response.data)}`);
-        // console.log(`Application Login Uri: ${response.data.app_login_uri}`);
-        if (response.data.app_login_uri) {
-          setLoginUri(response.data.app_login_uri);
-        }
-      } catch (e) {
-        console.log(
-          `Unable to get Application Login Uri: ${JSON.stringify(e)}`
-        );
-      }
-    };
+      // Start the Interval
+      intervalId.id = setInterval(() => {
+        getEmailVerificationStatus();
+      }, 2000);
 
-    // Use Effect Main Thread
-    console.log(`AT has been retrieved`);
-    // console.log(`AT from the state: ${accessToken}`);
-
-    // Fetching Application Login Uri
-    // console.log(`Fetching Application Login Uri`);
-    // getAppLoginUri();
-
-    console.log(`Fetching the Email Verification Status`);
-
-    // Start the Intervale
-    let intervalId = {};
-    intervalId.id = setInterval(() => {
-      getEmailVerificationStatus();
-    }, 2000);
-
-    // Clear interval on component unmount
-    return () => clearInterval(intervalId.id);
+      //Clear interval on component unmount
+      return () => clearInterval(intervalId.id);
+    }
   }, [accessToken]);
 
   if (isLoading) {
@@ -165,7 +127,9 @@ function Home() {
         verificationStatus={verifyStatus}
         email={user.email}
         emailMessage={emailMessage}
-        resendEmail={resend}
+        resendEmail={resendVerificationEmail}
+        error={errorMessage}
+        redirectToCIC={continueFunction}
       />
     )
   );
