@@ -78,7 +78,7 @@ function Home() {
     // Use Effect Main Thread
     // Parse the Query Parameters
     const queryString = window.location.search;
-    console.log(`Query String: ${queryString}`);
+    //console.log(`Query String: ${queryString}`);
     const urlParams = new URLSearchParams(queryString);
     setContinueState(urlParams.get("state"));
     // const sessionToken = urlParams.get("session_token");
