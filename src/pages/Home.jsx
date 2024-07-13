@@ -12,7 +12,6 @@ function Home() {
   const [accessToken, setAccessToken] = useState("");
 
   // Do not Run on First Load
-
   const isStatusFirstRender = useRef(true);
 
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } =
@@ -67,6 +66,15 @@ function Home() {
   }, []);
 
   useEffect(() => {
+    // Parse the Query Parameters
+    const queryString = window.location.search;
+    console.log(`Query String: ${queryString}`);
+
+    const urlParams = new URLSearchParams(queryString);
+    const state = urlParams.get("state");
+
+    console.log(`State Object: ${state}`);
+
     // Suppress the Automatic Render during the Initial Load
     if (isStatusFirstRender.current) {
       isStatusFirstRender.current = false;

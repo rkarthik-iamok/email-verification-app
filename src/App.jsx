@@ -13,6 +13,7 @@ function App() {
       {/* <Navbar /> */}
       <Routes>
         <Route path="/" element={<RequiredAuth component={Home} />} />
+
         {/* <Route path="/" exact element={<Home />} />
         <Route path="/about" exact element={<About />} />
         {/* <Route path="/profile" element={<UserProfile />} /> */}
