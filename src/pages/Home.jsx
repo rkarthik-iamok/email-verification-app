@@ -36,7 +36,7 @@ function Home() {
   const resendVerificationEmail = async () => {
     try {
       const response = await resendEmail(accessToken);
-      console.log(`Resend Email response: ${JSON.stringify(response.data.id)}`);
+      // console.log(`Resend Email response: ${JSON.stringify(response)}`);
       setEmailMessage("Email sent. Please check your mailbox");
     } catch (e) {
       console.log(`Unable to Send Verification Email: ${e}`);
@@ -52,7 +52,7 @@ function Home() {
     //   `Status Response in Main: ${JSON.stringify(response, null, 3)}`
     // );
     console.log(`Email Verification Response: ${response.status}`);
-    if (response.status) {
+    if (response.status == "true") {
       setVerifyStatus("VERIFIED");
       clearInterval(intervalId.id);
     }
@@ -67,7 +67,7 @@ function Home() {
         // console.log(`Obtained Access Token: ${token}`);
         // sessionStorage.setItem("accessToken", token);
         // Set it in the State
-        console.log(`Obtained Access Token`);
+        // console.log(`Obtained Access Token`);
         setAccessToken(token);
       } catch (e) {
         console.log(`Unable to get Access Token: ${JSON.stringify(e)}`);
